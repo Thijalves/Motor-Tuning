@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Graph from './components/Graph';
+import Graph from './components/GraphMulti';
 import Controls from './components/GraphControls';
 
 const App = () => {
   const [realSpeedStream, setRealSpeedStream] = useState([{ x: 0, y: 0 }]);
+  const [targetSpeedStream, setTargetSpeedStream] = useState([{ x: 0, y: 0 }]);
   const [isPaused, setIsPaused] = useState(true);
 
   // useEffect for graph update
@@ -44,7 +45,7 @@ const App = () => {
 
   return (
     <div>
-      <Graph dataStream={realSpeedStream} />
+      <Graph realSpeedStream={realSpeedStream} targetSpeedStream={realSpeedStream} />
       <Controls isPaused={isPaused} togglePause={togglePause} />
       {/* <FunctionGenerator /> */}
       {/* Add more components as needed */}

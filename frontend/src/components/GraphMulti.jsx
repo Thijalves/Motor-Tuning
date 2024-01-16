@@ -1,18 +1,28 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
 
-const Graph = ({dataStream}) => {
+const Graph = ({ realSpeedStream, targetSpeedStream}) => {
 
   // Arredonda os valores para uma casa decimal
-  const roundeddataStream = dataStream.map(point => ({
+  const roundedRealSpeedStream = realSpeedStream.map(point => ({
+    x: point.x,
+    y: parseFloat(point.y.toFixed(1)),
+  }));
+
+  // Arredonda os valores para uma casa decimal
+  const roundedTargetSpeedStream = targetSpeedStream.map(point => ({
     x: point.x,
     y: parseFloat(point.y.toFixed(1)),
   }));
 
   const series = [
     {
-      name: 'Data',
-      data: roundeddataStream,
+      name: 'Real speed',
+      data: roundedRealSpeedStream,
+    },
+    {
+      name: 'Target Speed',
+      data: roundedTargetSpeedStream,
     },
   ];
 

@@ -4,9 +4,11 @@ import Graph from './components/Graph';
 import Controls from './components/GraphControls';
 
 const App = () => {
-  const [dataStream, setDataStream] = useState([{ x: 0, y: 0 }]);
+  const [realSpeedStream, setRealSpeedStream] = useState([{ x: 0, y: 0 }]);
+  const [targetSpeedStream, setTargetSpeedStream] = useState([{ x: 0, y: 0 }]);
   const [isPaused, setIsPaused] = useState(false);
 
+  // useEffect for realSpeedStream
   useEffect(() => {
     let intervalId;
 
@@ -15,25 +17,54 @@ const App = () => {
         try {
           const response = await axios.get('http://localhost:8000/sin');
 
-          setDataStream((prevDataStream) => {
-            const lastData = prevDataStream[prevDataStream.length - 1];
+          setRealSpeedStream((prevRealSpeedStream) => {
+            const lastData = prevRealSpeedStream[prevRealSpeedStream.length - 1];
             const newPoint = {
               x: lastData.x + 1,
               y: response.data["data"],
             };
 
-            // Remove the oldest data if the length exceeds 100
-            if (prevDataStream.length >= 100) {
-              prevDataStream.shift(); // Remove the first element
+            if (prevRealSpeedStream.length >= 100) {
+              prevRealSpeedStream.shift();
             }
-            
-            // Return data
-            return [...prevDataStream, newPoint];
+
+            return [...prevRealSpeedStream, newPoint];
           });
         } catch (error) {
-          console.error('Error fetching data:', error);
+          console.error('Error fetching realSpeedStream data:', error);
         }
-      }, 100);
+      }, 200);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [isPaused]);
+
+  // useEffect for targetSpeedStream
+  useEffect(() => {
+    let intervalId;
+
+    if (!isPaused) {
+      intervalId = setInterval(async () => {
+        try {
+          const response = await axios.get('http://localhost:8000/cos');
+
+          setTargetSpeedStream((prevTargetSpeedStream) => {
+            const lastData = prevTargetSpeedStream[prevTargetSpeedStream.length - 1];
+            const newPoint = {
+              x: lastData.x + 1,
+              y: response.data["data"],
+            };
+
+            if (prevTargetSpeedStream.length >= 100) {
+              prevTargetSpeedStream.shift();
+            }
+
+            return [...prevTargetSpeedStream, newPoint];
+          });
+        } catch (error) {
+          console.error('Error fetching targetSpeedStream data:', error);
+        }
+      }, 200);
     }
 
     return () => clearInterval(intervalId);
@@ -45,9 +76,9 @@ const App = () => {
 
   return (
     <div>
-      <Graph dataStream={dataStream} />
+      <Graph realSpeedStream={realSpeedStream} targetSpeedStream={targetSpeedStream} />
       <Controls isPaused={isPaused} togglePause={togglePause} />
-      {/* Adicione mais componentes conforme necessário */}
+      {/* Add more components as needed */}
     </div>
   );
 };

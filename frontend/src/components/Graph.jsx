@@ -2,9 +2,16 @@ import React from 'react';
 import Chart from 'react-apexcharts';
 
 const Graph = ({ dataStream }) => {
+
+  // Arredonda os valores para uma casa decimal
+  const roundedDataStream = dataStream.map(point => ({
+    x: point.x,
+    y: parseFloat(point.y.toFixed(1)),
+  }));
+
   const series = [{
-    name: 'Velocity',
-    data: dataStream,
+    name: 'Velocidade',
+    data: roundedDataStream,
   }];
 
   const options = {
@@ -48,7 +55,7 @@ const Graph = ({ dataStream }) => {
     },
   };
 
-  return <Chart options={options} series={series} type="line" height={350} />;
+  return <Chart options={options} series={series} type="line" height={400} width={600} />;
 };
 
 export default Graph;

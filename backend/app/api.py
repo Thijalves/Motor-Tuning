@@ -31,5 +31,5 @@ async def read_sin():
     counter += 1
     # Generate a sine curve value between 0 and 2π based on the counter
     time = counter * 0.1  # Adjust the multiplier for the desired speed of iteration
-    speed = 50 + 50 * math.sin(time)
-    return {"speed": speed}
+    data = 50 * math.sin(time)
+    return {"data": data}

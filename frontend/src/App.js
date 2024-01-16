@@ -19,7 +19,7 @@ const App = () => {
             const lastData = prevDataStream[prevDataStream.length - 1];
             const newPoint = {
               x: lastData.x + 1,
-              y: response.data["speed"],
+              y: response.data["data"],
             };
 
             // Remove the oldest data if the length exceeds 100

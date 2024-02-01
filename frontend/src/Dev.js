@@ -1,56 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Graph from './components/GraphMulti';
-import Controls from './components/GraphControls';
+import TargetGenerator from './components/TargetGenerator';
 
-const App = () => {
-  const [realSpeedStream, setRealSpeedStream] = useState([{ x: 0, y: 0 }]);
-  const [targetSpeedStream, setTargetSpeedStream] = useState([{ x: 0, y: 0 }]);
-  const [isPaused, setIsPaused] = useState(true);
+const Dev = () => {
+  const [targets, setTargets] = useState([]);
+  const [currentTarget, setCurrentTarget] = useState(null);
+  const [displayingTargets, setDisplayingTargets] = useState(false);
 
-  // useEffect for graph update
-  useEffect(() => {
-    let intervalId;
+  // Update targets from target generator
+  const updateTargets = (event) => {
+    const newTargets = event.target.value.split(',').map(target => parseFloat(target.trim()));
+    setTargets(newTargets);
+  };
 
-    if (!isPaused) {
-      intervalId = setInterval(async () => {
-        try {
-          const response = await axios.get('http://localhost:8000/sin');
+  const startDisplayingTargets = () => {
+    let targetIndex = 0;
 
-          setRealSpeedStream((prevRealSpeedStream) => {
-            const lastData = prevRealSpeedStream[prevRealSpeedStream.length - 1];
-            const newPoint = {
-              x: lastData.x + 1,
-              y: response.data["data"],
-            };
+    const displayTargets = () => {
+      if (targetIndex < targets.length) {
+        setCurrentTarget(targets[targetIndex]);
 
-            if (prevRealSpeedStream.length >= 100) {
-              prevRealSpeedStream.shift();
-            }
+        // Send HTTP POST request with the current target as the payload
+        sendHttpPostRequest(targets[targetIndex]);
 
-            return [...prevRealSpeedStream, newPoint];
-          });
-        } catch (error) {
-          console.error('Error fetching realSpeedStream data:', error);
-        }
-      }, 200);
-    }
+        targetIndex++;
+        setTimeout(displayTargets, 1000); // Display each target for 1 second
+      } else {
+        setCurrentTarget(null);
+        setDisplayingTargets(false);
+      }
+    };
 
-    return () => clearInterval(intervalId);
-  }, [isPaused]);
+    setDisplayingTargets(true);
+    displayTargets();
+  };
 
-  const togglePause = () => {
-    setIsPaused((prevIsPaused) => !prevIsPaused);
+  const sendHttpPostRequest = (currentTarget) => {
+
+    axios.post('http://localhost:8000/setTargetSpeed', { speed: currentTarget })
+      .then(response => {
+        console.log('HTTP POST request successful:', response.data);
+        // Handle the response as needed
+      })
+      .catch(error => {
+        console.error('HTTP POST request failed:', error);
+        // Handle errors
+      });
   };
 
   return (
     <div>
-      <Graph realSpeedStream={realSpeedStream} targetSpeedStream={realSpeedStream} />
-      <Controls isPaused={isPaused} togglePause={togglePause} />
-      {/* <FunctionGenerator /> */}
-      {/* Add more components as needed */}
+      <TargetGenerator updateTargets={updateTargets} />
+      <button onClick={startDisplayingTargets} disabled={displayingTargets}>
+        Start Displaying Targets
+      </button>
+      <div>
+        <label>Current Target:</label>
+        <p>{currentTarget}</p>
+      </div>
     </div>
   );
 };
 
-export default App;
+export default Dev;
